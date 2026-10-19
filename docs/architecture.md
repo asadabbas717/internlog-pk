@@ -6,7 +6,10 @@ The MVP fits a static React application: all calculations and storage can run in
 
 ## Current modules
 
-- `src/app/App.tsx`: accessible development shell and offline-status coordination; no student workflows yet.
+- `src/app/App.tsx`: application landmarks, offline status and storage startup/recovery states.
+- `src/app/useLogbook.ts`: one active validated snapshot and connection, loading/saving state, synchronous operation lock, generation-guarded effect cleanup and revision/conflict coordination. `Workspace.tsx` coordinates focused feature components without IndexedDB calls.
+- `src/components`: labeled fields, focused error summaries and editor lifecycle/dirty-draft protections.
+- `src/features/internship`, `work-log`, `progress`: profile form/details, entry form/list/delete confirmation and authoritative saved-snapshot dashboard. Form-local draft state is separate from persisted data.
 - `src/domain`: readonly profile/entry/data contracts, strict runtime validation, calendar and duration arithmetic, authoritative progress and ordered daily/weekly summaries.
 - `src/infrastructure/storage`: native IndexedDB adapter and bounded, versioned internal serialization; fixed error codes and optimistic revision checks.
 - `src/infrastructure/offline/register.ts`: production-only browser registration and honest failure state.
@@ -15,7 +18,15 @@ The MVP fits a static React application: all calculations and storage can run in
 - `scripts/build-notices.mjs`: preserves complete runtime dependency license notices in distributed output before the worker asset inventory is generated.
 - `tests`: domain/codec/registration units, IndexedDB failure integration and real adapter browser tests alongside production shell/offline checks.
 
-Domain modules own validation, totals and grouping. Infrastructure owns IndexedDB and serialization; export controls are Phase 3. Phase 2 feature components will coordinate interactions through these contracts, without direct database access or duplicated rules. Add abstractions only when they solve an actual problem. The public shell does not initialize or write student storage yet.
+Domain modules own validation, profile/entry mutations, totals and grouping. Infrastructure owns IndexedDB and serialization; exports remain Phase 3. Feature components coordinate through these contracts, without direct database access or duplicated rules. `features/forms.ts` only parses digit-only input and formats integer durations. No state library or runtime dependency was added.
+
+## Form and concurrency behavior
+
+The app initializes storage and validates the current snapshot before displaying workflows. Corrupt/unavailable startup has explicit retry and no empty-logbook fallback. Writes resolve only after commit; pending operations disable competing actions. UI totals derive from committed snapshots, never draft fields.
+
+Each editor owns its text until successful save or confirmed cancel. Page-unload warnings are best-effort browser protection, not crash recovery. A conflict/closed connection blocks saves until the user explicitly reloads latest records. The hook replaces the committed snapshot while editors stay mounted and retain their drafts. Latest saved profile and entries remain visible for comparison. A subsequent save reapplies only the intended mutation against the refreshed dataset; editing a now-deleted entry fails instead of resurrecting it. No silent merge, automatic stale retry or automatic form reset occurs.
+
+Deletion uses a native modal dialog with initial focus on Keep entry, keyboard focus trapping, Escape cancellation and explicit permanent-delete action. Dirty editor cancellation uses browser confirmation. Entry duplicates receive a warning and an explicit Save distinct entry action; similar legitimate work is allowed. Evidence links are validated HTTP(S), rendered as text-safe React elements and opened with noopener/noreferrer. No schema or payload version changed.
 
 ## Offline lifecycle
 

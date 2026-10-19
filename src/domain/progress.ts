@@ -22,6 +22,17 @@ export function splitDuration(minutes: number): {
   return { hours: Math.floor(minutes / 60), minutes: minutes % 60 };
 }
 
+export function targetMinutes(hours: number, minutes: number): number {
+  integer(hours, 'requiredHours', 0, LIMITS.requiredMinutes / 60);
+  integer(minutes, 'requiredMinutes', 0, 59);
+  return integer(
+    hours * 60 + minutes,
+    'requiredHours',
+    1,
+    LIMITS.requiredMinutes,
+  );
+}
+
 export interface DaySummary {
   readonly date: string;
   readonly minutes: number;

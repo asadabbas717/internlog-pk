@@ -7,4 +7,7 @@
   --accent: #174b3d;
   --tint: #eaf0e9;
   --line: #d3ddd3;
+  --field-line: #71887a;
+  --error: #8c2525;
+  --error-tint: #fff1ef;
 }

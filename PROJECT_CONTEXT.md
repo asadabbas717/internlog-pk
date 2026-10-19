@@ -4,69 +4,54 @@ Updated: 2026-10-20 (Asia/Karachi).
 
 ## Current phase and authorization
 
-Phase 1 — Domain Model and Local Data: COMPLETE, ACCEPTED WITH LIMITATIONS. Applicable local gates and acceptance criteria pass; nonblocking manual/hosted checks remain below. The owner authorized a Phase 0 audit and exactly one additional phase was implemented. The owner subsequently authorized committing and pushing Phase 1 on 2026-10-20. No Phase 2 continuation or deployment is authorized.
+Phase 2 — Core Student Workflows: COMPLETE locally, ACCEPTED WITH LIMITATIONS. The review/resume request authorizes auditing Phase 1 and at most one next phase. The owner separately authorized committing and pushing Phase 2 on 2026-10-20. Phase 3 and deployment remain outside this request. Final source gates and installed-Chrome smoke review passed; report and stop.
 
-## Previous phase review
+## Previous phase audit
 
-Phase 0: ACCEPTED WITH LIMITATIONS. Inspected clean main, origin and initial commit 9e3317c162150af1d01bf44c68e0bacd881bb48b; read source/tests/CI/docs and reran clean npm ci, npm run check (7 tests), npm run test:e2e (4 tests), build and audit. All passed on local Node 26.7.0/npm 12.0.2. GitHub API confirms [hosted CI success](https://github.com/asadabbas717/internlog-pk/actions/runs/39327171588) for that commit on Node 24. No blocking source defect found. LOW documentation finding: hosted CI remained described as unverified; corrected using actual run evidence. Installation-icon/physical-device/cross-browser limitations remain release work.
+Phase 1 is ACCEPTED WITH LIMITATIONS. Repository was clean on main at 0b245acb029c435be233180705631edbadc6c66c, tracking origin/main. Reviewed README, architecture, requirements, roadmap, ADRs, source/tests and CI. Clean npm ci succeeded after stopping our older preview server that locked a Windows native binary. npm run check passed (152 tests), npm run test:e2e passed (8 tests), production build succeeded, and audit reported zero vulnerabilities. [Hosted Node 24 CI](https://github.com/asadabbas717/internlog-pk/actions/runs/39330161352) also passed for 0b245ac. No blocking source defect found; stale hosted-CI/handoff claims are corrected by this review. Physical-device/cross-browser/backup limitations remain release work.
 
-## Implemented functionality and architecture
+Earlier phases: Phase 0 foundation accepted; Phase 1 models/calendar/minutes/serialization/native IndexedDB accepted. Git and actual source take precedence over older historical completion claims.
 
-- src/domain/model.ts: readonly profile, entry and dataset types, limits and field-path ValidationError.
-- src/domain/validation.ts: strict own-field validation, bounded trimmed text, dates, safe HTTP(S) URLs, UUIDs, unique IDs, profile-date containment and daily totals. Null profile only with no entries; partial profiles rejected.
-- src/domain/calendar.ts and progress.ts: Gregorian years 0001–9999, UTC calendar arithmetic, Monday weeks, integer-minute conversion, ordered daily/weekly summaries and capped progress/excess/remaining/workday counts.
-- src/infrastructure/storage/codec.ts: internal format/version 1, validated encode/decode, 5 MiB UTF-8 limit; not a public backup API.
-- src/infrastructure/storage/database.ts: native IndexedDB schema v1, atomic initialization and revision-checked saves. Database internlog-pk, store state, key current, record { revision, payload }; empty revision 0 created during upgrade 0→1. Corruption, incompatible schemas, quota/abort, blocked/timeouts and stale writes preserve records and report fixed errors. Versionchange closes handles. No fictional legacy migration.
-- Public app: responsive accessible shell and production-only asset-allowlist offline caching. Stage text updated; no profile/entry forms, dashboard, reports, backup controls or student storage wiring yet. No runtime dependency added.
-- Tests: domain/codec units and fake-indexeddb failure integration, plus actual adapter Chromium tests through a development-only fixture on port 4174. Production shell tests remain on port 4173; fixture absent from dist.
+## Current behavior and architecture
 
-See docs/requirements.md, docs/architecture.md, docs/phase-1-plan.md and ADR 0002 for acceptance, schema and concurrency decisions. Derived totals are never persisted; features must use the domain and storage contracts.
+- App.tsx owns application landmarks, offline status and storage startup; useLogbook.ts owns one validated committed snapshot, connection lifetime, operation lock, errors and revision-aware save/refresh. Workspace coordinates feature components without direct IndexedDB access.
+- src/domain contains strict runtime models/validation, Gregorian date-only arithmetic, integer minutes, deterministic summaries, target conversion and profile/entry mutations. Progress always derives from committed records.
+- Profile form creates/edits student, institution, program, organization, optional supervisor, dates and configurable target hours/minutes. Default 150-hour example is clearly editable. Existing work cannot be excluded by profile date edits.
+- Work log creates/lists/edits entries, learning outcomes and optional validated HTTP(S) evidence. Similar-looking distinct work warns but can be saved. Native modal deletion requires explicit confirmation. Dirty cancel/unload warns; draft text survives failed saves.
+- Conflict/closed storage blocks further saves until explicit Load latest records (keep draft). Forms remain mounted; latest saved profile/list are visible for review. Resubmission applies the intended domain mutation to the refreshed dataset. A deleted ID cannot be resurrected by edit.
+- src/infrastructure/storage remains schema/payload v1: database internlog-pk, store state, current record with revision and bounded internal payload. Initialization is upgrade 0→1 only. Validation on every read/write; no corruption reset; atomic saves resolve after commit. No migration or dependency change was needed.
+- Public UI initializes local storage now. Offline production worker still precaches only build assets; private records are not cached as responses. Storage belongs to the browser profile and site origin, including local port.
+- Reports/portable backups remain unavailable and clearly labeled. This is a development build; use synthetic data until backups and release hardening are ready.
 
-## Verification evidence
+See docs/phase-2-plan.md for acceptance criteria and docs/architecture.md for form/concurrency behavior. Persistent engineering guidance remains in AGENTS.md, including installed-Chrome review with synthetic data on a separate origin.
 
-Final Phase 1 results on 2026-10-20 after all source/test changes:
+## Final verification
 
-| Command / check                | Actual result                                                                                                                                                                                    |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `npm ci`                       | PASS: clean final lockfile install, 238 packages added, 239 audited; zero vulnerabilities                                                                                                        |
-| `npm run check`                | PASS: TypeScript (full dependency checks), zero-warning ESLint, Prettier, coverage and production build                                                                                          |
-| Unit/integration               | PASS: 152 tests across 5 files, no unhandled test errors                                                                                                                                         |
-| Domain V8 coverage             | 100% statements/lines/functions; 98.01% branches; thresholds passed                                                                                                                              |
-| Overall source coverage        | 97.25% statements, 97.11% lines, 98.11% functions, 95.88% branches; React bootstrap excluded                                                                                                     |
-| `npm run test:e2e`             | PASS: 8 tests on desktop and Pixel 7 Chromium emulation; axe/keyboard/reflow, production shell offline reopening, actual adapter reload/offline read-write-reopen and native cross-tab conflicts |
-| `npm audit --audit-level=high` | PASS: zero vulnerabilities reported for final dependency set                                                                                                                                     |
-| Build output inspection        | PASS: test harness absent from dist; six shell assets precached; JS 224.63 kB / 70.33 kB gzip                                                                                                    |
-| `git diff --check`             | PASS; final documentation-only edits also receive Prettier verification                                                                                                                          |
+Final npm run check passed: 185 tests across 6 files, strict TypeScript, zero-warning lint, formatting, coverage thresholds and production build. Domain lines/statements/functions 100%, branches 98.31%; overall lines 96.9%, branches 92.63%. Production JS 252.15 kB / 78.59 kB gzip; CSS 8.50 kB / 2.49 kB gzip; six precached shell assets, revision e8a184d86ed0a1f7. Final npm run test:e2e: 16 passed across desktop and Pixel 7 Chromium. This covers CRUD, safe links, dialog focus/cancel/delete, stale-tab UI, denied storage, cached shell and saved-record offline reopening/further saves. npm audit --audit-level=high: zero vulnerabilities. Development storage harness absent from dist; git diff --check passed.
 
-These results supersede intermediate failing runs, including a corrected writable-property issue in the synthetic asynchronous-error fixture. Checks were rerun rather than suppressing unhandled errors. No claim of physical-device testing, security certification or field validation is made.
+Installed Chrome reconnected and was reviewed on the separate, initially empty origin http://127.0.0.1:4180/internlog-pk/. Saved a synthetic profile and 2h 30m entry, verified totals (147h 30m remaining, one workday), stopped the preview server and reloaded successfully with both records retained. This verifies server-unavailable cached reopening, not a manual OS-network-offline simulation. Browser-tool date fill initially did not dispatch the required native change; a native ArrowUp change completed the synthetic dates and saved normally. No product source change was required. Screenshot: C:/Users/Waheed/.codex/visualizations/2026/10/19/01a155ed-0857-70e0-9a1a-56ff3c1183c6/phase2-chrome.png. Existing records on other origins were untouched.
 
-Additional owner-requested check on 2026-10-20: connected to the owner's installed Chrome through the browser extension, opened the production preview at `/internlog-pk/`, visually inspected rendering, followed the roadmap link and observed offline-ready status. Stopped the local preview server and reloaded successfully from the cached shell, then restored the server. This verifies an installed-Chrome smoke check and cached reload with the server unavailable; it does not imply phone hardware, installation UI or storage-adapter testing in that Chrome profile. Earlier automated adapter tests remain Chromium-based.
+The early integration cold-start timeout passed in isolation; the startup assertion now waits up to five seconds (storage open timeout remains ten seconds). No assertions, quality thresholds or valid tests were removed to hide failures.
 
-Environment: Windows, Node 26.7.0/npm 12.0.2. CI baseline remains Node 24/npm 11–12. Sandbox blocks registry DNS/localhost sockets; approved external execution permits npm/audit/browser checks. fake-indexeddb 6.2.6 (Apache-2.0) is the only added dev dependency. Use npm ci with the lockfile.
+Environment: Windows, Node 26.7.0/npm 12.0.2. CI baseline Node 24/npm 11–12. Sandbox restricts registry DNS/localhost; approved external npm/browser execution is available. No dependencies added in Phase 2.
 
-Commands: npm run check (typecheck, lint, format, coverage, build), npm run test:e2e (two servers), npm audit --audit-level=high. Domain thresholds: >=95% statements/lines/functions, >=90% branches.
+Required commands: npm ci; npm run check; npm run test:e2e; npm audit --audit-level=high. Stop preview servers before npm ci/browser tests. Playwright uses ports 4173 and 4174. Test harness remains development-only and absent from dist.
 
-## Fresh review and findings
+## Fresh review
 
-| Severity / location                                  | Evidence and impact                                                                                                                   | Correction and verification                                                                                       |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| LOW, old PROJECT_CONTEXT.md and docs/dependencies.md | Hosted CI described as unverified despite successful published run; stale handoff evidence                                            | Read GitHub API result for 9e3317c and corrected documents                                                        |
-| MEDIUM, database.ts failure classification           | DOMException did not reliably satisfy instanceof Error; quota/permission/version failures received generic codes in integration tests | Inspect error name structurally without surfacing private details; matching tests passed                          |
-| MEDIUM, database.ts initial upgrade request          | A failed initial request can become a generic AbortError on the open request, losing useful quota guidance                            | Capture initial request error before open failure; asynchronous failure/rollback regression passed in final suite |
+Final review completed: checked module boundaries, source privacy, exact integer progress, field/error association, dirty cancellation, commit-only success, schema preservation and concurrent draft recovery. During implementation corrected callback typing without lint suppressions, distinct accessible heading IDs and cleanup of connections reopened during retry. Added explicit regression tests for initial-profile conflict retention, edits of remotely deleted entries and closed-connection reopening. No unresolved critical/high finding identified within Phase 2 scope; final gates pass. Low-severity stale CI documentation in PROJECT_CONTEXT.md and docs/dependencies.md was corrected against the successful hosted Phase 1 run. Medium-severity draft-loss/resurrection and reopened-connection lifetime risks found during implementation were corrected in Workspace.tsx/useLogbook.ts/domain mutations and verified by targeted integration regressions, including conflict refresh and closed-handle recovery. Input contrast and heading associations were corrected and verified with browser axe checks and visual review.
 
-Fresh review also inspected runtime validation, URL/content handling, transaction lifetime, concurrent writes, schema preservation, cache privacy, UI honesty and dependency scope. Abort-after-queued-write tests verify rollback and success only after commit. All eight phase-specific acceptance criteria in docs/phase-1-plan.md are satisfied with the evidence above. No unresolved critical/high finding remains in Phase 1 scope.
+## Remaining limitations
 
-## Known limitations and pending acceptance
+- Release prerequisite, intentional phase boundary: portable backups/recovery and print reports are not available until Phase 3. Keep the development/synthetic-data notice; this is not ready for real-student release.
+- Browser storage/caches are not encrypted or permanent; browser eviction/device loss cannot be recovered here. Unsaved warnings are best-effort, not crash recovery.
+- Only initial DB upgrade 0→1 exists; future schema changes require preserving migrations and fixtures.
+- Phase 2 hosted CI, physical Android/low-end performance, Firefox/Safari, screen readers, broader zoom/reflow, deployed Pages, install UX and worker-update lifecycle are NOT VERIFIED. Earlier Phase 1 hosted CI is verified.
+- SVG-only manifest icons may limit install prompts. Quota/blocked/abort tests inject failures; they do not exhaust a real device's disk.
+- No security certification, institutional approval or real-student pilot has occurred. No dedicated sensitive-report contact or named maintainer established.
 
-- No student-facing workflows/backups yet; public shell does not initialize student storage.
-- Only initial schema upgrade 0→1 exists. Future versions need preserving migrations and tests. Missing/corrupt records must never auto-reset.
-- Quota/abort/blocked injection tests adapter failure behavior, not physical disk exhaustion. Real-device eviction/recovery and low-end performance are NOT VERIFIED.
-- Phase 0 Node 24 hosted CI is verified; Phase 1 hosted CI, Safari/Firefox, physical Android, screen readers, deployed Pages, worker-update lifecycle and broad installation UX are NOT VERIFIED.
-- LOW: SVG-only manifest icon may limit install UI. Caches/local records are not encrypted or guaranteed permanent. This is not a release or field-validation claim.
-- No sensitive-report contact or named maintainer established; conditional GitHub guidance remains in SECURITY.md.
+## Git state and exact next action
 
-## Git state and next action
+Phase 2 is prepared for the owner-authorized commit and push to origin/main, based on 0b245ac (Phase 1). Use actual git log/status and the push result for the final commit identity and remote state. No deployment occurred.
 
-Branch main tracks origin/main. Phase 1 is prepared for the owner-authorized commit and push to `https://github.com/asadabbas717/internlog-pk.git` on 2026-10-20; the remote was confirmed at Phase 0 commit 9e3317c before publication. This handoff is included in the Phase 1 commit. Inspect `git log -1` and `git status` for the final commit hash and push state. No deployment performed.
-
-Current action: STOP after Phase 1; await owner instruction. Exact next action after separate authorization: inspect Git and this handoff, audit Phase 1, then implement Phase 2 only — profile/entry CRUD and progress UI through validated/revision-aware contracts. Preserve unsaved forms on conflict and require review before reapplying to a fresh revision. No manual owner action is required to resolve a Phase 1 blocker. The app is not ready for real-student use until workflows and backup/release phases are completed.
+Phase 2 is complete locally. REPORT AND STOP. On the next separately authorized resume, audit Phase 2 against source and gates before planning Phase 3. Next planned phase after separate authorization: Phase 3 only — accurate printable weekly logbook and strict, confirmed JSON backup export/import. No owner decision currently blocks Phase 2.

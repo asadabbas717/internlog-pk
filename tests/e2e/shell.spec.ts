@@ -52,7 +52,7 @@ test('precaches only application assets and reopens offline', async ({
   const reopened = await context.newPage();
   await reopened.goto('./');
   await expect(reopened.getByRole('heading', { level: 1 })).toHaveText(
-    'Your internship,clearly recorded.',
+    'Your internship, clearly recorded.',
   );
   await expect(reopened.getByRole('status')).toHaveText(
     /ready for offline use/,
