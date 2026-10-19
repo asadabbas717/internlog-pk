@@ -1,0 +1,9 @@
+# Dependency review
+
+Registry metadata, declared peer ranges and npm audit reviewed on 2026-10-20. Versions are resolved in package-lock.json; use npm ci. No forced or legacy peer resolution. TypeScript 6 stays within typescript-eslint's declared support; ESLint 10 avoids an unsupported lint major. Browser accessibility uses axe instead of an incompatible accessibility lint plugin. React and React DOM are the only direct runtime packages; scheduler is transitive.
+
+Runtime packages use MIT licenses. `scripts/build-notices.mjs` includes their complete installed license texts and versions in `dist/THIRD_PARTY_NOTICES.txt`; review that package list when runtime dependencies change. Project source is Apache-2.0. The production precache also includes these notices.
+
+Installed development/tool packages declare MIT, MIT-0, Apache-2.0, ISC, BSD-2-Clause, BSD-3-Clause, CC0-1.0, BlueOak-1.0.0, MPL-2.0 or CC-BY-4.0. MPL packages include axe tooling and Lightning CSS; caniuse-lite declares CC-BY-4.0. These are build/test tooling or data, not application runtime packages. Keep upstream licenses when distributing dependencies or tooling. This inventory is an engineering review, not legal advice; recheck changed dependencies and bundled artifacts before release.
+
+Stable Vite requirements were checked against the [official guide](https://vite.dev/guide/). CI action release tags were checked against official releases for [checkout](https://github.com/actions/checkout/releases/tag/v7.0.1), [setup-node](https://github.com/actions/setup-node/releases/tag/v7.1.0) and [upload-artifact](https://github.com/actions/upload-artifact/releases/tag/v7.0.2). Hosted execution remains unverified until pushed to GitHub.

@@ -1,0 +1,9 @@
+# Verification
+
+Run `npm ci`, `npm run check`, `npx playwright install chromium`, `npm run test:e2e`, and `npm audit --audit-level=high`. Linux CI installs browser OS dependencies with `npx playwright install --with-deps chromium`. Browser downloads need network access. Tests use synthetic content and no accounts. The Playwright web server always builds production output first; `npm run dev` deliberately has no service worker.
+
+`check` runs typecheck, zero-warning ESLint, Prettier, Vitest V8 coverage and production build. The unit suite checks unsupported, development, success, failed and stalled registration. Integration tests verify truthful feature boundaries, semantic landmarks and privacy notices. Browser tests exercise keyboard skip navigation, desktop/mobile layout, axe WCAG A/AA rules, explicit cache contents and offline reopening under a repository subpath. Automated axe results do not replace a full accessibility audit. Generated reports are ignored by Git.
+
+Coverage includes app and infrastructure source; the React root bootstrap is excluded because browsers exercise it. There are no domain calculations yet. Phase 1 must add strict high coverage thresholds for critical domain code and meaningful invariant assertions. Do not inflate coverage with trivial implementation-mirroring tests.
+
+Pending release checks: physical Android/low-end device, Safari/Firefox, screen reader, contrast/zoom/reflow review, installation UX, storage eviction, worker update lifecycle and deployed GitHub Pages behavior. These are not implied by passing Chromium emulation. Phase 1 adds IndexedDB initialization/upgrade/transaction failures; Phases 2–3 add workflows and backups. Record dated actual command outcomes in PROJECT_CONTEXT.md; never carry forward passing claims after relevant changes.
