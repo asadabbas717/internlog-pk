@@ -606,3 +606,138 @@ footer span {
     scroll-behavior: auto;
   }
 }
+
+.backup-panel,
+.report-controls {
+  margin-block: 1.5rem;
+}
+.backup-panel input[type='file'] {
+  max-width: 100%;
+}
+.backup-review {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--tint);
+  overflow-wrap: anywhere;
+}
+.confirmation-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin-block: 1rem;
+}
+.confirmation-check input {
+  width: 1.2rem;
+  height: 1.2rem;
+  flex-shrink: 0;
+}
+.print-report {
+  display: none;
+  overflow-wrap: anywhere;
+}
+.report-preview {
+  display: block;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: clamp(1rem, 3vw, 2.5rem);
+  margin-block: 2rem;
+}
+.report-profile {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 0.5rem 1rem;
+}
+.report-profile dt {
+  font-weight: 700;
+}
+.report-profile dd {
+  margin: 0;
+}
+.report-week {
+  margin-top: 2rem;
+}
+.print-report table {
+  table-layout: fixed;
+  width: 100%;
+}
+.print-report th:first-child {
+  width: 22%;
+}
+.print-report th:last-child {
+  width: 18%;
+}
+.print-report td {
+  vertical-align: top;
+}
+.print-report td p {
+  margin-block: 0 0.6rem;
+}
+.report-day-total {
+  background: var(--tint);
+}
+.review-spaces {
+  margin-top: 1rem;
+  font-size: 0.9em;
+}
+@page {
+  size: A4;
+  margin: 16mm;
+}
+@media print {
+  :root {
+    --ink: #000;
+    --muted: #333;
+    --surface: #fff;
+    --paper: #fff;
+    --line: #777;
+    color-scheme: light;
+  }
+  .site-header,
+  .skip-link,
+  .page-intro,
+  .workspace-screen,
+  .storage-note,
+  footer {
+    display: none !important;
+  }
+  body,
+  main {
+    width: auto;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    color: #000;
+    font-size: 10pt;
+  }
+  .print-report {
+    display: block;
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+  .report-week + .report-week {
+    break-before: page;
+  }
+  .print-report thead {
+    display: table-header-group;
+  }
+  .print-report tr {
+    break-inside: auto;
+  }
+  .report-day-total,
+  .review-spaces {
+    break-inside: avoid;
+  }
+  .print-report h2,
+  .print-report h3 {
+    break-after: avoid;
+  }
+  .print-report th,
+  .print-report td {
+    border: 1px solid #777;
+    padding: 2mm;
+  }
+  .print-report caption {
+    color: #333;
+  }
+}

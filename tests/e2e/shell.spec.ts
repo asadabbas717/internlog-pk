@@ -29,7 +29,9 @@ test('precaches only application assets and reopens offline', async ({
   context,
 }) => {
   await page.goto('./');
-  await expect(page.getByRole('status')).toHaveText(/ready for offline use/, {
+  await expect(
+    page.getByRole('status', { name: 'Offline availability' }),
+  ).toHaveText(/ready for offline use/, {
     timeout: 20000,
   });
   await page.evaluate(async () => {
@@ -54,7 +56,7 @@ test('precaches only application assets and reopens offline', async ({
   await expect(reopened.getByRole('heading', { level: 1 })).toHaveText(
     'Your internship, clearly recorded.',
   );
-  await expect(reopened.getByRole('status')).toHaveText(
-    /ready for offline use/,
-  );
+  await expect(
+    reopened.getByRole('status', { name: 'Offline availability' }),
+  ).toHaveText(/ready for offline use/);
 });

@@ -58,7 +58,7 @@ export function App({ openDatabase }: { openDatabase?: OpenDatabase } = {}) {
               learn.
             </p>
           </div>
-          <span className="phase-label">Phase 2 · Development build</span>
+          <span className="phase-label">Phase 3 · Development build</span>
         </div>
         {session.snapshot ? (
           <Workspace snapshot={session.snapshot} session={session} />
@@ -80,7 +80,8 @@ export function App({ openDatabase }: { openDatabase?: OpenDatabase } = {}) {
           <p>
             Clearing site data, browser eviction, operating-system cleanup, or
             device failure can remove your records. Keep original evidence
-            separately. Backup export is planned for Phase 3.
+            separately. Export backups regularly and verify that the files are
+            saved outside this browser.
           </p>
           <p role="status" aria-label="Offline availability">
             {offlineMessages[offline]}

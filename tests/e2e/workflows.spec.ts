@@ -110,7 +110,11 @@ test('complete profile and entry CRUD workflow with validation, safe links and a
   ).toBeVisible();
   await expect(page.getByText('0% of your target recorded')).toBeVisible();
   await page.reload();
-  await expect(page.getByText('Sample Student', { exact: true })).toBeVisible();
+  await expect(
+    page
+      .getByRole('region', { name: 'Internship profile' })
+      .getByText('Sample Student', { exact: true }),
+  ).toBeVisible();
   await expect(page.getByText('Your work belongs here.')).toBeVisible();
   expect(errors).toEqual([]);
 });
@@ -131,7 +135,9 @@ test('saved student workflow reopens and records more work offline', async ({
   const reopened = await context.newPage();
   await reopened.goto('./');
   await expect(
-    reopened.getByText('Sample Student', { exact: true }),
+    reopened
+      .getByRole('region', { name: 'Internship profile' })
+      .getByText('Sample Student', { exact: true }),
   ).toBeVisible();
   await expect(
     reopened.getByRole('article', { name: 'Work entry on 2026-10-19' }),
@@ -169,7 +175,9 @@ test('stale-tab UI keeps its draft and requires explicit refresh before resubmis
     .click();
   await expect(other.getByText(/Latest records loaded/)).toBeVisible();
   await expect(
-    other.getByText('First tab saved task', { exact: true }),
+    other
+      .getByRole('article', { name: 'Work entry on 2026-10-19' })
+      .getByText('First tab saved task', { exact: true }),
   ).toBeVisible();
   await expect(other.getByLabel('Work performed', { exact: true })).toHaveValue(
     'Draft from another tab',

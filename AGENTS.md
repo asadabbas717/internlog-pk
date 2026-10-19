@@ -2,7 +2,7 @@
 
 - Read PROJECT_CONTEXT.md and inspect actual files and `git status` first. Code and Git override stale handoff claims. Preserve existing work and student data.
 - Implement exactly the separately authorized phase; follow inspect → plan → implement → test → review → document → report → stop. Do not continue automatically.
-- Scope: independent student record organization, React/strict TypeScript/Vite/plain CSS/native IndexedDB, future print HTML. No backend, accounts, analytics, paid APIs, fabricated work/endorsements or unapproved features.
+- Scope: independent student record organization, React/strict TypeScript/Vite/plain CSS/native IndexedDB, browser print HTML. No backend, accounts, analytics, paid APIs, fabricated work/endorsements or unapproved features.
 - Keep calculations/validation pure in domain; minutes are integers, dates are calendar-only strings, weeks Monday–Sunday. Runtime-validate persisted/imported values. UI must not duplicate rules or directly implement IndexedDB.
 - Use the revision from `load()` when calling storage `save(data, expectedRevision)`. Preserve unsaved edits on conflict and require review of the latest data; never auto-retry stale snapshots or silently reset corrupt storage. Schema changes need preserving migrations and tests; version 1 currently has only initial upgrade 0→1.
 - No unsafe HTML/eval, student data in logs or fixtures, embedded secrets, `any`, unexplained unsafe casts, forced dependency installs or suppressed failures. Bound imports and text. Confirm destructive actions and preserve valid data on failure.

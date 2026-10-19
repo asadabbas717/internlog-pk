@@ -17,6 +17,7 @@ import {
 import type { LogDatabase } from '../../src/infrastructure/storage/database';
 import type { InternshipData } from '../../src/domain/model';
 import { makeData, makeEntry } from '../fixtures/data';
+import { encodeBackup } from '../../src/infrastructure/export/backup';
 
 const handles: LogDatabase[] = [];
 afterEach(() => {
@@ -80,6 +81,146 @@ async function saved(message: string) {
   await screen.findByText(message);
 }
 
+function inspectBackup(
+  data: unknown = makeData([
+    makeEntry(2, { description: 'Imported sample work' }),
+  ]),
+) {
+  const file = new File([], 'synthetic.json', { type: 'application/json' });
+  const json = typeof data === 'string' ? data : encodeBackup(data);
+  Object.defineProperty(file, 'arrayBuffer', {
+    value: () => Promise.resolve(new TextEncoder().encode(json).buffer),
+  });
+  fireEvent.change(screen.getByLabelText('Choose JSON backup to inspect'), {
+    target: { files: [file] },
+  });
+}
+function confirmReplacement() {
+  fireEvent.click(
+    screen.getByRole('button', {
+      name: 'Continue to replacement confirmation',
+    }),
+  );
+  fireEvent.click(screen.getByRole('checkbox', { name: /I understand/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Replace all records' }));
+}
+
+describe('backup replacement through real storage coordination', () => {
+  it('rejects corrupt input without writes and cancels replacement without losing drafts', async () => {
+    const app = await boot(makeData());
+    fireEvent.click(screen.getByRole('button', { name: /Add entry/ }));
+    fillEntry('Private unsaved draft');
+    inspectBackup('{');
+    await screen.findByText('Backup is not valid JSON.');
+    expect((await (await app.open()).load()).data).toEqual(makeData());
+    inspectBackup();
+    await screen.findByRole('heading', { name: 'Review before replacement' });
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Continue to replacement confirmation',
+      }),
+    );
+    expect(
+      screen
+        .getByRole('button', { name: 'Replace all records' })
+        .hasAttribute('disabled'),
+    ).toBe(true);
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Keep current records' }),
+    );
+    expect(fieldValue('Work performed')).toBe('Private unsaved draft');
+    expect((await (await app.open()).load()).data).toEqual(makeData());
+  });
+  it('commits confirmed replacement once, discards drafts explicitly and persists on reload', async () => {
+    const app = await boot(makeData());
+    fireEvent.click(screen.getByRole('button', { name: /Add entry/ }));
+    fillEntry('Draft to discard');
+    inspectBackup();
+    await screen.findByRole('heading', { name: 'Review before replacement' });
+    confirmReplacement();
+    await screen.findByText(/Replacement committed successfully/);
+    expect(screen.queryByLabelText('Work performed')).toBeNull();
+    expect((await (await app.open()).load()).data.entries).toEqual([
+      makeEntry(2, { description: 'Imported sample work' }),
+    ]);
+    app.unmount();
+    await boot((await (await app.open()).load()).data);
+    expect(
+      screen.getByRole('article', { name: 'Work entry on 2026-10-19' })
+        .textContent,
+    ).toContain('Imported sample work');
+  });
+  it('retains original data and inspected candidate on quota failure', async () => {
+    const app = await boot(makeData());
+    inspectBackup();
+    await screen.findByRole('heading', { name: 'Review before replacement' });
+    const spy = vi
+      .spyOn(IDBObjectStore.prototype, 'put')
+      .mockImplementation(() => {
+        throw new DOMException('full', 'QuotaExceededError');
+      });
+    confirmReplacement();
+    await screen.findAllByText(/Browser storage is full/);
+    expect(screen.queryByText(/Replacement committed successfully/)).toBeNull();
+    expect(
+      screen.getByRole('heading', { name: 'Review before replacement' }),
+    ).toBeTruthy();
+    spy.mockRestore();
+    expect((await (await app.open()).load()).data).toEqual(makeData());
+  });
+  it('requires fresh review and confirmation after a concurrent write rather than blindly retrying replacement', async () => {
+    const app = await boot(makeData());
+    inspectBackup();
+    await screen.findByRole('heading', { name: 'Review before replacement' });
+    const other = await app.open();
+    const current = await other.load();
+    await other.save(
+      makeData([makeEntry(3, { description: 'Other tab work' })]),
+      current.revision,
+    );
+    confirmReplacement();
+    await screen.findAllByText(/Records changed in another tab/);
+    expect((await other.load()).data.entries[0]?.description).toBe(
+      'Other tab work',
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Load latest records (keep draft)' }),
+    );
+    await screen.findByText(/Saved records changed after inspection/);
+    expect(
+      screen.queryByRole('button', {
+        name: 'Continue to replacement confirmation',
+      }),
+    ).toBeNull();
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Review replacement against latest records',
+      }),
+    );
+    confirmReplacement();
+    await screen.findByText(/Replacement committed successfully/);
+    expect((await other.load()).data.entries[0]?.description).toBe(
+      'Imported sample work',
+    );
+  });
+  it('can restore into a fresh logbook and back to an empty logbook with a fresh profile form', async () => {
+    await boot();
+    change('Student name', 'Draft name');
+    inspectBackup();
+    await screen.findByRole('heading', { name: 'Review before replacement' });
+    confirmReplacement();
+    await screen.findByText(/Replacement committed successfully/);
+    expect(
+      screen.queryByRole('heading', { name: 'Set up your internship' }),
+    ).toBeNull();
+    inspectBackup({ profile: null, entries: [] });
+    await screen.findByText('No profile (empty logbook)');
+    confirmReplacement();
+    await screen.findByRole('heading', { name: 'Set up your internship' });
+    expect(fieldValue('Student name')).toBe('');
+  });
+});
+
 describe('student workflows with actual storage coordination', () => {
   it('exposes landmarks, offline/privacy boundaries and usable empty profile form', async () => {
     await boot();
@@ -142,7 +283,9 @@ describe('student workflows with actual storage coordination', () => {
     await saved('Profile saved on this browser.');
     app.unmount();
     render(<App openDatabase={app.open} />);
-    await screen.findByText('Updated Example');
+    await within(
+      await screen.findByRole('region', { name: 'Internship profile' }),
+    ).findByText('Updated Example');
     expect(
       screen.queryByRole('form', { name: 'Set up your internship' }),
     ).toBeNull();
@@ -230,7 +373,9 @@ describe('student workflows with actual storage coordination', () => {
     await screen.findByRole('alert');
     expect(screen.getByRole('alert').textContent).toContain('date range');
     expect(
-      screen.getByText('Implemented and tested a sample form.'),
+      within(
+        screen.getByRole('article', { name: 'Work entry on 2026-10-19' }),
+      ).getByText('Implemented and tested a sample form.'),
     ).toBeTruthy();
   });
   it('confirms abandoning unsaved forms and keeps them if cancelled', async () => {
@@ -348,7 +493,11 @@ describe('student workflows with actual storage coordination', () => {
     );
     await screen.findByText(/Latest records loaded/);
     expect(fieldValue('Host organization')).toBe('Draft organization');
-    expect(screen.getByText('Example Software', { exact: true })).toBeTruthy();
+    expect(
+      within(
+        screen.getByRole('region', { name: 'Internship profile' }),
+      ).getByText('Example Software', { exact: true }),
+    ).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Save profile' }));
     await saved('Profile saved on this browser.');
     expect((await other.load()).data.profile?.organization).toBe(
@@ -418,7 +567,9 @@ describe('student workflows with actual storage coordination', () => {
       ]),
     );
     expect(
-      screen.getByText('<script>throw new Error("x")</script>'),
+      within(
+        screen.getByRole('article', { name: 'Work entry on 2026-10-19' }),
+      ).getByText('<script>throw new Error("x")</script>'),
     ).toBeTruthy();
     const link = within(
       screen.getByRole('article', { name: 'Work entry on 2026-10-19' }),

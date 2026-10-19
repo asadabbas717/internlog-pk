@@ -1,6 +1,10 @@
 import { useRef, useState } from 'react';
 import type { StoredSnapshot } from '../infrastructure/storage/database';
-import type { InternshipProfile, WorkEntry } from '../domain/model';
+import type {
+  InternshipData,
+  InternshipProfile,
+  WorkEntry,
+} from '../domain/model';
 import { changeProfile, removeEntry, saveEntry } from '../domain/mutations';
 import type { Issue, LogbookSession, SaveResult } from './useLogbook';
 import { ProfileCard } from '../features/internship/ProfileCard';
@@ -10,6 +14,8 @@ import { EntryForm } from '../features/work-log/EntryForm';
 import { EntryList } from '../features/work-log/EntryList';
 import { DeleteDialog } from '../features/work-log/DeleteDialog';
 import { StorageProblem } from './StorageProblem';
+import { BackupPanel } from '../features/backup/BackupPanel';
+import { LogbookReport } from '../features/reports/LogbookReport';
 
 export function Workspace({
   snapshot,
@@ -25,6 +31,8 @@ export function Workspace({
   const [pendingDelete, setPendingDelete] = useState<WorkEntry | null>(null);
   const [actionIssue, setActionIssue] = useState<Issue | null>(null);
   const [notice, setNotice] = useState('');
+  const [preview, setPreview] = useState(false);
+  const [editorGeneration, setEditorGeneration] = useState(0);
   const logTitle = useRef<HTMLHeadingElement>(null);
   const busy = session.loading || session.saving;
   const editing = editingProfile || editor !== null;
@@ -71,132 +79,184 @@ export function Workspace({
         'Latest records loaded. Your draft is unchanged. Review the saved records before saving again.',
       );
   }
+  function replaced(data: InternshipData) {
+    setEditor(null);
+    setEditingProfile(data.profile === null);
+    setEditorGeneration((value) => value + 1);
+    setNotice('');
+    setActionIssue(null);
+  }
   return (
     <>
-      {(session.problem ?? actionIssue) && (
-        <StorageProblem
-          issue={session.problem ?? actionIssue}
-          busy={busy}
-          onRetry={refresh}
-          label="Load latest records (keep draft)"
-        />
-      )}
-      {notice && (
-        <p className="save-notice" role="status">
-          {notice}
-        </p>
-      )}
-      <ProgressDashboard data={snapshot.data} />
-      <div className="workspace-grid">
-        <section id="work-log" aria-labelledby="work-log-title">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Day by day</p>
-              <h2 ref={logTitle} id="work-log-title" tabIndex={-1}>
-                Your work log
-              </h2>
+      <div className="workspace-screen">
+        {(session.problem ?? actionIssue) && (
+          <StorageProblem
+            issue={session.problem ?? actionIssue}
+            busy={busy}
+            onRetry={refresh}
+            label="Load latest records (keep draft)"
+          />
+        )}
+        {notice && (
+          <p className="save-notice" role="status">
+            {notice}
+          </p>
+        )}
+        <ProgressDashboard data={snapshot.data} />
+        <div className="workspace-grid">
+          <section id="work-log" aria-labelledby="work-log-title">
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">Day by day</p>
+                <h2 ref={logTitle} id="work-log-title" tabIndex={-1}>
+                  Your work log
+                </h2>
+              </div>
+              <button
+                type="button"
+                disabled={
+                  !snapshot.data.profile ||
+                  editing ||
+                  busy ||
+                  session.needsRefresh
+                }
+                onClick={() => {
+                  setNotice('');
+                  setEditor('new');
+                }}
+              >
+                ＋ Add entry
+              </button>
             </div>
+            {!snapshot.data.profile && (
+              <p className="field-hint">
+                Complete your profile before adding work.
+              </p>
+            )}
+            {editor !== null && snapshot.data.profile && (
+              <EntryForm
+                key={editorGeneration}
+                initial={editor === 'new' ? null : editor}
+                profile={snapshot.data.profile}
+                data={snapshot.data}
+                busy={busy}
+                needsRefresh={session.needsRefresh}
+                onSave={storeEntry}
+                onCancel={() => {
+                  setEditor(null);
+                  logTitle.current?.focus();
+                }}
+              />
+            )}
+            <EntryList
+              entries={snapshot.data.entries}
+              disabled={editing || busy || session.needsRefresh}
+              onEdit={(entry) => {
+                setNotice('');
+                setEditor(entry);
+              }}
+              onDelete={(entry) => {
+                setNotice('');
+                setActionIssue(null);
+                setPendingDelete(entry);
+              }}
+            />
+          </section>
+          <section id="profile" aria-label="Internship profile">
+            <ProfileCard
+              profile={snapshot.data.profile}
+              disabled={editing || busy || session.needsRefresh}
+              onEdit={() => {
+                setNotice('');
+                setEditingProfile(true);
+              }}
+            />
+            {editingProfile && (
+              <ProfileForm
+                key={editorGeneration}
+                initial={snapshot.data.profile}
+                busy={busy}
+                needsRefresh={session.needsRefresh}
+                onSave={storeProfile}
+                onCancel={
+                  snapshot.data.profile
+                    ? () => {
+                        setEditingProfile(false);
+                      }
+                    : undefined
+                }
+              />
+            )}
+            <aside className="privacy-note">
+              <h3>Private. Local. Yours.</h3>
+              <p>
+                No account, tracking, or server-side student storage. Browser
+                data can be cleared, evicted, or lost with your device.
+              </p>
+              <p>
+                Records belong to this browser profile and site address. A
+                different browser or address opens a separate local logbook.
+              </p>
+              <p>
+                <strong>Development build:</strong> export private backups
+                regularly and check that they are saved outside this browser.
+                Broader release testing is still in progress.
+              </p>
+            </aside>
+          </section>
+        </div>
+        <section
+          className="panel report-controls"
+          aria-labelledby="report-controls-title"
+        >
+          <h2 id="report-controls-title">Reports</h2>
+          <p>
+            Preview saved records grouped by Monday–Sunday weeks. Print or
+            choose Save as PDF in your browser. Open drafts are excluded.
+            Printed files contain private information; review the destination
+            and print settings.
+          </p>
+          <div className="form-actions">
             <button
               type="button"
-              disabled={
-                !snapshot.data.profile ||
-                editing ||
-                busy ||
-                session.needsRefresh
-              }
+              className="secondary"
+              disabled={!snapshot.data.profile || busy}
+              aria-expanded={preview}
+              aria-controls="report"
               onClick={() => {
-                setNotice('');
-                setEditor('new');
+                setPreview(!preview);
               }}
             >
-              ＋ Add entry
+              {preview ? 'Hide logbook preview' : 'Preview saved logbook'}
+            </button>
+            <button
+              type="button"
+              disabled={!snapshot.data.profile || busy}
+              onClick={() => {
+                window.print();
+              }}
+            >
+              Print / Save as PDF
             </button>
           </div>
-          {!snapshot.data.profile && (
-            <p className="field-hint">
-              Complete your profile before adding work.
-            </p>
-          )}
-          {editor !== null && snapshot.data.profile && (
-            <EntryForm
-              initial={editor === 'new' ? null : editor}
-              profile={snapshot.data.profile}
-              data={snapshot.data}
-              busy={busy}
-              needsRefresh={session.needsRefresh}
-              onSave={storeEntry}
-              onCancel={() => {
-                setEditor(null);
-                logTitle.current?.focus();
-              }}
-            />
-          )}
-          <EntryList
-            entries={snapshot.data.entries}
-            disabled={editing || busy || session.needsRefresh}
-            onEdit={(entry) => {
-              setNotice('');
-              setEditor(entry);
-            }}
-            onDelete={(entry) => {
-              setNotice('');
-              setActionIssue(null);
-              setPendingDelete(entry);
-            }}
-          />
         </section>
-        <section id="profile" aria-label="Internship profile">
-          <ProfileCard
-            profile={snapshot.data.profile}
-            disabled={editing || busy || session.needsRefresh}
-            onEdit={() => {
-              setNotice('');
-              setEditingProfile(true);
-            }}
-          />
-          {editingProfile && (
-            <ProfileForm
-              initial={snapshot.data.profile}
-              busy={busy}
-              needsRefresh={session.needsRefresh}
-              onSave={storeProfile}
-              onCancel={
-                snapshot.data.profile
-                  ? () => {
-                      setEditingProfile(false);
-                    }
-                  : undefined
-              }
-            />
-          )}
-          <aside className="privacy-note">
-            <h3>Private. Local. Yours.</h3>
-            <p>
-              No account, tracking, or server-side student storage. Browser data
-              can be cleared, evicted, or lost with your device.
-            </p>
-            <p>
-              Records belong to this browser profile and site address. A
-              different browser or address opens a separate local logbook.
-            </p>
-            <p>
-              <strong>Development build:</strong> reports and portable backups
-              are not available yet. Use synthetic records until the backup
-              workflow is ready.
-            </p>
-          </aside>
-        </section>
-      </div>
-      {pendingDelete && (
-        <DeleteDialog
-          entry={pendingDelete}
-          busy={busy}
-          onCancel={() => {
-            setPendingDelete(null);
-          }}
-          onConfirm={confirmDelete}
+        <BackupPanel
+          snapshot={snapshot}
+          session={session}
+          onReplaced={replaced}
         />
-      )}
+        {pendingDelete && (
+          <DeleteDialog
+            entry={pendingDelete}
+            busy={busy}
+            onCancel={() => {
+              setPendingDelete(null);
+            }}
+            onConfirm={confirmDelete}
+          />
+        )}
+      </div>
+      <LogbookReport data={snapshot.data} preview={preview} />
     </>
   );
 }

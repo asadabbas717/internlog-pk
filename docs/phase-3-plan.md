@@ -1,0 +1,15 @@
+# Phase 3 acceptance plan
+
+Authorized by the phase review/resume request on 2026-10-20. Phase 2 at 3bc3ab6 is accepted with limitations: clean install, 185 tests, 16 desktop/mobile browser tests, build/lint/typecheck/format/coverage and dependency audit passed; hosted Node 24 CI succeeded. No blocking source defect identified. Stale handoff/CI documentation will be corrected.
+
+1. Printable saved-record logbook includes profile, internship dates, configurable target, deterministic Monday weeks, daily activities/learning/evidence and exact daily/weekly/grand totals. Blank genuine review/signature spaces carry no approval claim. No draft data appears.
+2. Accessible on-screen preview and browser print/Save as PDF workflow; neutral print styles, wrapping long content, repeated table headers and sensible page breaks. Empty profile/work states are honest.
+3. Portable JSON uses strict `{ format: 'internlog-pk', version: 1, profile, entries }`. Bound file bytes before reading, UTF-8 bytes before parsing, validate all nested/aggregate rules and storage size before offering replacement. Unknown fields/versions, corruption, unsafe URLs and duplicate IDs fail without writes.
+4. Export current saved records with a fixed filename, no private data in logs, remote requests or worker caches. Explain that starting a download does not prove an external copy is safe.
+5. Import inspection shows candidate identity/count/time against current records. Offer export first; require a modal and explicit replacement acknowledgement. Cancel leaves records/drafts intact. Confirmed replacement discards open drafts explicitly and uses one existing revision-checked transaction. Failure preserves current records/candidate; conflict requires refresh and fresh review, never automatic replacement retry.
+6. Integration and browser tests cover round-trip, hostile/corrupt/oversized input, cancellation, quota/transaction/conflict failures, offline export/import and report correctness/print layout. Retain existing gates; review installed Chrome with synthetic data if connected.
+7. No schema/dependency changes, Phase 4 deployment/hardening, automatic commit/push or unrelated refactor. Update affected docs and continuity with actual evidence, review findings and remaining limitations; report and stop.
+
+Implementation: separate bounded backup codec and browser file/download adapter; backup UI via the existing session; report presentation via the existing domain summary; meaningful tests, review and documentation.
+
+Outcome: COMPLETE locally, ACCEPTED WITH LIMITATIONS. Final npm run check passed (203 tests), final npm run test:e2e passed (24 desktop/mobile tests), dependency audit found zero vulnerabilities. Corrected long-entry print pagination and post-modal restore focus; final checks and four rendered PDF pages reviewed. Installed Chrome report preview/download feedback verified; extension-mediated file upload unavailable without file-URL permission, left unchanged. See ../PROJECT_CONTEXT.md for exact evidence, review findings and owner/native-print/release limitations. No Phase 4 implementation or publication.
