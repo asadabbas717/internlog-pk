@@ -2,51 +2,71 @@
 
 Updated: 2026-10-20 (Asia/Karachi).
 
-## Current phase
+## Current phase and authorization
 
-Phase 0 — Repository and Engineering Foundation: COMPLETE with applicable local gates verified. Hosted and manual checks below remain NOT VERIFIED; this is not a product release or field-validation claim. Phase 1 is not authorized in this session.
+Phase 1 — Domain Model and Local Data: COMPLETE, ACCEPTED WITH LIMITATIONS. Applicable local gates and acceptance criteria pass; nonblocking manual/hosted checks remain below. The owner authorized a Phase 0 audit and exactly one additional phase was implemented. The owner subsequently authorized committing and pushing Phase 1 on 2026-10-20. No Phase 2 continuation or deployment is authorized.
 
-## Scope and functionality
+## Previous phase review
 
-The directory was empty and not a Git repository. Initialized branch `main`. No existing data/files were overwritten. Implemented a truthful accessible React shell, responsive CSS tokens, production manifest, content-versioned asset-only service worker, strict TypeScript/ESLint/Prettier, Vitest/Testing Library, Playwright and GitHub Actions CI. Profile entry, CRUD, domain calculations, IndexedDB, reports, backups and deployment are intentionally absent.
+Phase 0: ACCEPTED WITH LIMITATIONS. Inspected clean main, origin and initial commit 9e3317c162150af1d01bf44c68e0bacd881bb48b; read source/tests/CI/docs and reran clean npm ci, npm run check (7 tests), npm run test:e2e (4 tests), build and audit. All passed on local Node 26.7.0/npm 12.0.2. GitHub API confirms [hosted CI success](https://github.com/asadabbas717/internlog-pk/actions/runs/39327171588) for that commit on Node 24. No blocking source defect found. LOW documentation finding: hosted CI remained described as unverified; corrected using actual run evidence. Installation-icon/physical-device/cross-browser limitations remain release work.
 
-## Architecture and decisions
+## Implemented functionality and architecture
 
-App presentation in src/app, browser registration in src/infrastructure/offline, CSS in src/styles. Build script creates a worker from the exact emitted asset list. Relative Vite paths support project hosting. Tests target a repository subpath. No runtime cache, backend or remote assets. See docs/architecture.md, docs/requirements.md and ADR 0001. Domain contract is proposed documentation, not executable code. Monday weeks, date-only strings and integer minutes are fixed principles.
+- src/domain/model.ts: readonly profile, entry and dataset types, limits and field-path ValidationError.
+- src/domain/validation.ts: strict own-field validation, bounded trimmed text, dates, safe HTTP(S) URLs, UUIDs, unique IDs, profile-date containment and daily totals. Null profile only with no entries; partial profiles rejected.
+- src/domain/calendar.ts and progress.ts: Gregorian years 0001–9999, UTC calendar arithmetic, Monday weeks, integer-minute conversion, ordered daily/weekly summaries and capped progress/excess/remaining/workday counts.
+- src/infrastructure/storage/codec.ts: internal format/version 1, validated encode/decode, 5 MiB UTF-8 limit; not a public backup API.
+- src/infrastructure/storage/database.ts: native IndexedDB schema v1, atomic initialization and revision-checked saves. Database internlog-pk, store state, key current, record { revision, payload }; empty revision 0 created during upgrade 0→1. Corruption, incompatible schemas, quota/abort, blocked/timeouts and stale writes preserve records and report fixed errors. Versionchange closes handles. No fictional legacy migration.
+- Public app: responsive accessible shell and production-only asset-allowlist offline caching. Stage text updated; no profile/entry forms, dashboard, reports, backup controls or student storage wiring yet. No runtime dependency added.
+- Tests: domain/codec units and fake-indexeddb failure integration, plus actual adapter Chromium tests through a development-only fixture on port 4174. Production shell tests remain on port 4173; fixture absent from dist.
 
-Registry metadata verified stable React 19.3.1, Vite 8.3.4, Vitest 5.0.5, TypeScript 7.0.2 and ESLint 10.13.0. Selected TypeScript 6.0.3 because typescript-eslint supports TypeScript below 6.1; no forced dependency resolution. Rejected unsupported ESLint 9 and its accessibility plugin; final ESLint is 10 with axe browser accessibility checks. Removed jest-dom because its assertion declarations conflict with Vitest 5 under full library type checking; Testing Library tests use native DOM assertions, and Playwright verifies visibility/focus. Node 24 is CI baseline; local Node 26.7.0/npm 12.0.2. Use npm ci and committed lockfile.
+See docs/requirements.md, docs/architecture.md, docs/phase-1-plan.md and ADR 0002 for acceptance, schema and concurrency decisions. Derived totals are never persisted; features must use the domain and storage contracts.
 
-## Completed phases and verification evidence
+## Verification evidence
 
-Phase 0 results on 2026-10-20, local Node 26.7.0/npm 12.0.2, Windows:
+Final Phase 1 results on 2026-10-20 after all source/test changes:
 
-| Check                          | Actual result                                                                                                                                      |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm ci`                       | PASS: clean lockfile installation, 237 packages added; zero audit vulnerabilities                                                                  |
-| `npm run check`                | PASS: full TypeScript checking including dependencies, zero-warning ESLint, Prettier, tests/coverage and production build                          |
-| Unit/integration               | PASS: 7 tests in 2 files                                                                                                                           |
-| V8 source coverage             | 100% statements/lines/functions; 83.33% branches. Bootstrap excluded; no domain code exists yet                                                    |
-| Production build               | PASS: 17 modules; JS 224.65 kB / 70.36 kB gzip; six precached assets including runtime license notices                                             |
-| `npm run test:e2e`             | PASS: 4 tests, desktop and Pixel 7 Chromium emulation; keyboard, overflow, axe A/AA, asset-only cache and offline reopening under `/internlog-pk/` |
-| `npm audit --audit-level=high` | PASS: zero vulnerabilities reported                                                                                                                |
-| Dependency review              | Runtime MIT notices preserved in output; tooling license metadata reviewed in docs/dependencies.md                                                 |
+| Command / check                | Actual result                                                                                                                                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `npm ci`                       | PASS: clean final lockfile install, 238 packages added, 239 audited; zero vulnerabilities                                                                                                        |
+| `npm run check`                | PASS: TypeScript (full dependency checks), zero-warning ESLint, Prettier, coverage and production build                                                                                          |
+| Unit/integration               | PASS: 152 tests across 5 files, no unhandled test errors                                                                                                                                         |
+| Domain V8 coverage             | 100% statements/lines/functions; 98.01% branches; thresholds passed                                                                                                                              |
+| Overall source coverage        | 97.25% statements, 97.11% lines, 98.11% functions, 95.88% branches; React bootstrap excluded                                                                                                     |
+| `npm run test:e2e`             | PASS: 8 tests on desktop and Pixel 7 Chromium emulation; axe/keyboard/reflow, production shell offline reopening, actual adapter reload/offline read-write-reopen and native cross-tab conflicts |
+| `npm audit --audit-level=high` | PASS: zero vulnerabilities reported for final dependency set                                                                                                                                     |
+| Build output inspection        | PASS: test harness absent from dist; six shell assets precached; JS 224.63 kB / 70.33 kB gzip                                                                                                    |
+| `git diff --check`             | PASS; final documentation-only edits also receive Prettier verification                                                                                                                          |
 
-The sandbox blocks registry DNS and localhost sockets. Approved external execution allowed npm and browser checks; these checks ultimately ran successfully. No physical-device testing or field validation occurred. Final source/build checks passed after adding license-notice generation; subsequent handoff edits are documentation-only and receive a final formatting check.
+These results supersede intermediate failing runs, including a corrected writable-property issue in the synthetic asynchronous-error fixture. Checks were rerun rather than suppressing unhandled errors. No claim of physical-device testing, security certification or field validation is made.
 
-## Quality review
+Additional owner-requested check on 2026-10-20: connected to the owner's installed Chrome through the browser extension, opened the production preview at `/internlog-pk/`, visually inspected rendering, followed the roadmap link and observed offline-ready status. Stopped the local preview server and reloaded successfully from the cached shell, then restored the server. This verifies an installed-Chrome smoke check and cached reload with the server unavailable; it does not imply phone hardware, installation UI or storage-adapter testing in that Chrome profile. Earlier automated adapter tests remain Chromium-based.
 
-Performed a separate critical pass over scope honesty, error paths, worker lifecycle/cache boundaries, accessibility, dependencies, licensing and documentation. Fixed indefinite setup status with a timeout; removed incompatible matcher declarations without disabling library checks; used supported ESLint with browser axe; preserved runtime licenses removed by minification. No known blocking/high-severity finding remains in Phase 0 scope. npm audit is dependency evidence, not a security guarantee. See requirements.md for the acceptance boundary.
+Environment: Windows, Node 26.7.0/npm 12.0.2. CI baseline remains Node 24/npm 11–12. Sandbox blocks registry DNS/localhost sockets; approved external execution permits npm/audit/browser checks. fake-indexeddb 6.2.6 (Apache-2.0) is the only added dev dependency. Use npm ci with the lockfile.
 
-## Known limitations and pending checks
+Commands: npm run check (typecheck, lint, format, coverage, build), npm run test:e2e (two servers), npm audit --audit-level=high. Domain thresholds: >=95% statements/lines/functions, >=90% branches.
 
-- No student records accepted yet (intentional phase boundary).
-- Low severity: installation UX varies; SVG-only manifest icon may not support every platform install prompt (Phase 4). Offline browser reopening is verified separately.
-- Release checks pending: GitHub-hosted CI, Node 24, deployed Pages, Safari/Firefox, screen readers and physical Android are NOT VERIFIED.
-- Browser caches can be evicted; local storage is never guaranteed permanent.
-- Sensitive-report contact and named maintainers are not established; SECURITY.md provides conditional GitHub reporting guidance.
+## Fresh review and findings
+
+| Severity / location                                  | Evidence and impact                                                                                                                   | Correction and verification                                                                                       |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| LOW, old PROJECT_CONTEXT.md and docs/dependencies.md | Hosted CI described as unverified despite successful published run; stale handoff evidence                                            | Read GitHub API result for 9e3317c and corrected documents                                                        |
+| MEDIUM, database.ts failure classification           | DOMException did not reliably satisfy instanceof Error; quota/permission/version failures received generic codes in integration tests | Inspect error name structurally without surfacing private details; matching tests passed                          |
+| MEDIUM, database.ts initial upgrade request          | A failed initial request can become a generic AbortError on the open request, losing useful quota guidance                            | Capture initial request error before open failure; asynchronous failure/rollback regression passed in final suite |
+
+Fresh review also inspected runtime validation, URL/content handling, transaction lifetime, concurrent writes, schema preservation, cache privacy, UI honesty and dependency scope. Abort-after-queued-write tests verify rollback and success only after commit. All eight phase-specific acceptance criteria in docs/phase-1-plan.md are satisfied with the evidence above. No unresolved critical/high finding remains in Phase 1 scope.
+
+## Known limitations and pending acceptance
+
+- No student-facing workflows/backups yet; public shell does not initialize student storage.
+- Only initial schema upgrade 0→1 exists. Future versions need preserving migrations and tests. Missing/corrupt records must never auto-reset.
+- Quota/abort/blocked injection tests adapter failure behavior, not physical disk exhaustion. Real-device eviction/recovery and low-end performance are NOT VERIFIED.
+- Phase 0 Node 24 hosted CI is verified; Phase 1 hosted CI, Safari/Firefox, physical Android, screen readers, deployed Pages, worker-update lifecycle and broad installation UX are NOT VERIFIED.
+- LOW: SVG-only manifest icon may limit install UI. Caches/local records are not encrypted or guaranteed permanent. This is not a release or field-validation claim.
+- No sensitive-report contact or named maintainer established; conditional GitHub guidance remains in SECURITY.md.
 
 ## Git state and next action
 
-Phase 0 foundation prepared for the initial commit on branch `main`. Owner authorized committing and pushing to `https://github.com/asadabbas717/internlog-pk.git` on 2026-10-20. Remote inspection found no existing refs. The initial commit contains this handoff; inspect `git log -1` and `git status` for its final hash and push state. No deployment or Phase 1 work is authorized by this publication step.
+Branch main tracks origin/main. Phase 1 is prepared for the owner-authorized commit and push to `https://github.com/asadabbas717/internlog-pk.git` on 2026-10-20; the remote was confirmed at Phase 0 commit 9e3317c before publication. This handoff is included in the Phase 1 commit. Inspect `git log -1` and `git status` for the final commit hash and push state. No deployment performed.
 
-Phase 0 is finished; stop and await separate authorization. Exact next action after authorization: inspect Git/docs, review proposed invariants in docs/requirements.md, then implement Phase 1 only: runtime-validated pure domain model, calendar/minute calculations, versioned IndexedDB and failure/upgrade tests. No automated continuation. Owner may inspect the shell with `npm run dev`; no owner action is required to resolve a Phase 0 blocker.
+Current action: STOP after Phase 1; await owner instruction. Exact next action after separate authorization: inspect Git and this handoff, audit Phase 1, then implement Phase 2 only — profile/entry CRUD and progress UI through validated/revision-aware contracts. Preserve unsaved forms on conflict and require review before reapplying to a fresh revision. No manual owner action is required to resolve a Phase 1 blocker. The app is not ready for real-student use until workflows and backup/release phases are completed.

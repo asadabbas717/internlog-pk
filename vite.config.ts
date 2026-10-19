@@ -13,6 +13,14 @@ export default defineConfig({
       include: ['src/**/*.ts', 'src/**/*.tsx'],
       exclude: ['src/main.tsx'],
       reporter: ['text', 'html', 'json-summary'],
+      thresholds: {
+        'src/domain/**': {
+          statements: 95,
+          branches: 90,
+          functions: 95,
+          lines: 95,
+        },
+      },
     },
   },
 });

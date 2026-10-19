@@ -34,7 +34,7 @@ export function App() {
           </span>
           InternLog <span className="brand-country">PK</span>
         </a>
-        <span className="phase-label">Phase 0 · Engineering foundation</span>
+        <span className="phase-label">Phase 1 · Data foundation</span>
       </header>
       <main id="main" tabIndex={-1}>
         <section className="hero" aria-labelledby="welcome">
@@ -49,11 +49,9 @@ export function App() {
             your progress, and prepare records for supervisor review.
           </p>
           <p className="development-notice">
-            <strong>
-              The foundation is ready. The logbook is still in development.
-            </strong>{' '}
-            Profile setup, work entries, reports, and backups are planned for
-            later phases. You cannot enter student records yet.
+            <strong>The logbook is still in development.</strong> Profile setup,
+            work entries, reports, and backups are planned for later phases. You
+            cannot enter student records yet.
           </p>
           <a className="text-link" href="#roadmap">
             See what is being built <span aria-hidden="true">↓</span>
@@ -99,12 +97,14 @@ export function App() {
           <div>
             <p className="eyebrow">A focused roadmap</p>
             <h2 id="roadmap-title">One dependable step at a time.</h2>
-            <p>Only the engineering foundation is included in this build.</p>
+            <p>The data foundation is complete. Student workflows are next.</p>
           </div>
           <ol>
             <li>
               <strong>01 · Domain & local data</strong>
-              <span>Validated records and IndexedDB persistence.</span>
+              <span>
+                Complete: validated models and local storage infrastructure.
+              </span>
             </li>
             <li>
               <strong>02 · Student workflows</strong>

@@ -1,0 +1,13 @@
+# ADR 0002: Validated, revision-checked local dataset
+
+Status: accepted for Phase 1, 2026-10-20.
+
+Store one bounded dataset in native IndexedDB rather than splitting profile and entries across independently updated stores. The app's modest data volume (10,000 entries and 5 MiB serialized data) makes whole-state validation practical and keeps profile ranges, unique IDs and daily totals atomic. All derived totals remain pure calculations. No runtime storage dependency or extra repository/service framework is needed.
+
+Database `internlog-pk`, schema version 1: one out-of-line-key store `state`, one record keyed `current`: `{ revision, payload }`. A new database's versionchange transaction creates the store and empty revision 0 record together. The internal payload is JSON `{ format: 'internlog-pk-data', version: 1, data: { profile, entries } }`. Database, payload and future backup versions are distinct contracts. There is no released legacy schema: the only current upgrade is 0→1. Future versions need explicit, preserving migrations with fixtures; never fabricate a migration to claim coverage.
+
+`openLogDatabase()` exposes `load`, `save(data, expectedRevision)` and `close`. `load` validates both record metadata and payload. `save` validates and detaches caller data before opening a transaction; inside one read/write transaction it validates the current record, compares the expected revision and queues the replacement with revision + 1. It resolves only on transaction completion. Competing tabs serialize and stale writers receive a conflict; Phase 2 must retain their unsaved form data, load the latest revision and ask users to review/reapply changes. Never blindly retry stale data.
+
+Missing/corrupted/unknown-version data is an error, never an empty-state fallback. Unsupported DB/schema versions are left untouched. Quota, denied, aborted, blocked, timeout and closed-connection errors have fixed messages without user records/platform details. Versionchange closes handles so another tab can upgrade; callers must reopen. Open requests cannot be cancelled: failed/timed-out requests abort late initial upgrades or close late connections. Explicit close is part of the API contract.
+
+Native transaction behavior follows the [IndexedDB specification](https://www.w3.org/TR/IndexedDB-3/). Tests use fake-indexeddb for deterministic failures and an actual adapter harness on a separate Vite development origin for Chromium reload/conflict checks. The harness is absent from production output. Whole-dataset serialization is O(data size); benchmark low-end devices before release and revisit only with evidence. No guarantee of disk permanence or recovery is implied by transaction success.
