@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import type { StoredSnapshot } from '../infrastructure/storage/database';
 import type {
   InternshipData,
@@ -32,10 +33,37 @@ export function Workspace({
   const [actionIssue, setActionIssue] = useState<Issue | null>(null);
   const [notice, setNotice] = useState('');
   const [preview, setPreview] = useState(false);
+  const [printing, setPrinting] = useState(false);
   const [editorGeneration, setEditorGeneration] = useState(0);
   const logTitle = useRef<HTMLHeadingElement>(null);
+  const deleteTrigger = useRef<HTMLButtonElement | null>(null);
   const busy = session.loading || session.saving;
   const editing = editingProfile || editor !== null;
+  useEffect(() => {
+    if (pendingDelete !== null || !deleteTrigger.current) return;
+    const trigger = deleteTrigger.current;
+    deleteTrigger.current = null;
+    // The native dialog has now been removed; restore a usable focus target.
+    if (trigger.isConnected && !trigger.disabled) trigger.focus();
+    else logTitle.current?.focus();
+  }, [pendingDelete]);
+  useEffect(() => {
+    // Native Ctrl+P must receive the committed report before the browser captures it.
+    const beforePrint = () => {
+      flushSync(() => {
+        setPrinting(true);
+      });
+    };
+    const afterPrint = () => {
+      setPrinting(false);
+    };
+    window.addEventListener('beforeprint', beforePrint);
+    window.addEventListener('afterprint', afterPrint);
+    return () => {
+      window.removeEventListener('beforeprint', beforePrint);
+      window.removeEventListener('afterprint', afterPrint);
+    };
+  }, []);
 
   async function storeProfile(profile: InternshipProfile): Promise<SaveResult> {
     setNotice('');
@@ -149,13 +177,15 @@ export function Workspace({
               />
             )}
             <EntryList
+              key={`entries-${String(editorGeneration)}`}
               entries={snapshot.data.entries}
               disabled={editing || busy || session.needsRefresh}
               onEdit={(entry) => {
                 setNotice('');
                 setEditor(entry);
               }}
-              onDelete={(entry) => {
+              onDelete={(entry, trigger) => {
+                deleteTrigger.current = trigger;
                 setNotice('');
                 setActionIssue(null);
                 setPendingDelete(entry);
@@ -256,7 +286,9 @@ export function Workspace({
           />
         )}
       </div>
-      <LogbookReport data={snapshot.data} preview={preview} />
+      {(preview || printing) && (
+        <LogbookReport data={snapshot.data} preview={preview} />
+      )}
     </>
   );
 }

@@ -179,6 +179,7 @@ test('concurrent edits require refresh and new replacement review', async ({
 
 test('saved logbook has accurate print totals, safe wrapping and excludes unsaved drafts', async ({
   page,
+  browserName,
 }, testInfo) => {
   await page.goto('./');
   const longData = {
@@ -223,11 +224,13 @@ test('saved logbook has accurate print totals, safe wrapping and excludes unsave
     page.getByRole('button', { name: 'Export current backup' }),
   ).not.toBeVisible();
   await expect(report).toBeVisible();
-  await page.pdf({
-    path: testInfo.outputPath('logbook.pdf'),
-    preferCSSPageSize: true,
-    displayHeaderFooter: false,
-  });
+  // Playwright's PDF API is Chromium-only; all engines still verify print media.
+  if (browserName === 'chromium')
+    await page.pdf({
+      path: testInfo.outputPath('logbook.pdf'),
+      preferCSSPageSize: true,
+      displayHeaderFooter: false,
+    });
   await page.screenshot({
     path: testInfo.outputPath('print-layout.png'),
     fullPage: true,

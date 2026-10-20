@@ -48,3 +48,11 @@ Profile edits cannot exclude existing work. Similar date/description/duration wi
 See [Phase 3 acceptance plan](phase-3-plan.md). Reports include the saved profile/dates/target, genuine saved activities and learning/evidence text, ordered Monday weeks, daily/weekly/grand totals and blank student/supervisor review/signature/date spaces. Print HTML uses browser printing/Save as PDF; no generated endorsement, institution logo or signature. Empty days/attendance are never fabricated. Browser-native printing may add its own headers/footers according to user settings.
 
 Portable backups use version 1 and require valid UTF-8. The 5 MiB byte bound applies before parsing and before reading oversized files; imported data must also fit the internal storage envelope. Inspection summarizes candidate and current records without writing. Replacement requires a modal acknowledgement covering all current records and open drafts; offer export first. Cancel preserves both. Save uses the current expected revision; conflicts block and require explicit refresh, fresh review and new confirmation. No implicit merge, auto-retry, corrupt-data reset or legacy migration is introduced.
+
+## Phase 4 release candidate
+
+See [Phase 4 acceptance plan](phase-4-plan.md) and [release guide](release.md). Ordinary work-log rendering is limited to 50 cards per page; all saved records remain in progress, backups and full reports. Native beforeprint prepares the complete saved-only report even without preview. Profile/entry/storage/backup contracts and schema version 1 remain unchanged.
+
+Release checks extend the existing gates to Chromium desktop/mobile, Firefox and WebKit, narrower/landscape layouts, 200% text, reduced motion, modal cancellation focus, install assets, production policy/network behavior, bounded capacity and actual worker revisions/cache-scope isolation. Playwright engine/viewport/CPU emulation does not establish physical-device, installed Safari, screen-reader or printer behavior. Manual owner acceptance and live HTTPS hosting checks are explicit release limitations.
+
+Pages configuration uses manual dispatch on main with quality/audit/browser gates and least job permissions. Phase 4 prepares that configuration; actual publication/settings changes require a later owner instruction. No Phase 5 pilot or fabricated student feedback belongs to this phase.

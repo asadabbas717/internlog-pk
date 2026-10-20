@@ -1,0 +1,19 @@
+# Phase 4 acceptance plan
+
+Authorized by the phase review/resume request on 2026-10-20. Phase 3 at c22811a is ACCEPTED WITH LIMITATIONS after independent source/architecture/privacy/test review, clean npm ci, npm run check (203 tests), 24 browser checks, zero-vulnerability audit and successful hosted Node 24 CI. No blocking source defect identified; stale publication/CI context will be corrected.
+
+1. Exercise core saved-record, backup, failure/conflict, keyboard and offline workflows in Chromium desktop/mobile, Firefox and WebKit where available. Keep Chromium PDF generation; other engines still exercise print media. Distinguish engine emulation from physical devices/Safari.
+2. Test narrow/landscape reflow, keyboard dialogs/focus, reduced motion, contrast and accessible labels with synthetic data. Correct evidenced usability defects without unrelated redesign. Record screen-reader/physical-device checks that cannot run here.
+3. Verify actual worker installation failure, revision waiting/activation and cache-scope isolation, including persisted records across an update. No forced activation, private response caching or storage reset.
+4. Measure bounded synthetic logbooks and cold asset size, including CPU throttling where available. Address measured rendering waste with the smallest correction. Keep every stored record accessible and backup/report totals exact; do not claim low-end physical-device performance from emulation.
+5. Review production CSP/network behavior, input/rendering/privacy safeguards, dependencies/licenses and build artifacts. Provide practical raster install icons from the existing code-native mark. Avoid new runtime dependencies or schema changes.
+6. Prepare a manually dispatched GitHub Pages workflow with quality/security/browser gates, least job permissions and immutable verified action pins. No public deployment, repository setting change, automatic commit/push or Phase 5 pilot in this run. Record that live hosting and actual install UX remain unverified until owner publication/acceptance.
+7. Final full quality gates, fresh review, synthetic screenshots, release/setup/deployment/limitations documentation and updated continuity. Stop temporary servers when checks finish, then report and stop.
+
+## Outcome - 2026-10-21
+
+COMPLETE locally, ACCEPTED WITH LIMITATIONS. All seven scoped criteria implemented and reviewed. Final npm run check passed 204 tests across 8 files, strict types/lint/format, coverage and production build; npm run test:e2e passed all 76 checks across four browser projects in 3.4 minutes; npm audit --audit-level=high found zero vulnerabilities. Build asset boundary and gzip budgets passed. The worker transition also passed ten repeated Chromium desktop/mobile runs before the final full suite. Failures encountered during implementation and their corrections are recorded in PROJECT_CONTEXT.md.
+
+Installed Chrome on separate synthetic origin 4182 passed save/report/focus and desktop/320px review, then retained its profile and entry after server shutdown and cached reload. Native-without-preview PDF and all four long-report pages were rendered and visually reviewed. No physical device, actual Safari, screen reader, native printer destination, live Pages site or hosted Phase 4 run is claimed. Manual publication configuration is prepared only; owner acceptance follows docs/release.md. No dependency/schema change, public deployment, commit/push or Phase 5 work performed. Temporary servers stopped. Report and stop.
+
+Follow-up owner-reported development styling and phone LAN HTTP entry-save defects were corrected on 2026-10-21. Current gates: 205 unit/integration tests, all 84 browser tests, production build and zero-vulnerability audit passed. See PROJECT_CONTEXT.md for the causes, test-fixture correction, updated build identity and exact physical-phone retest. No new phase or publication occurred.

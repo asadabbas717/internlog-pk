@@ -17,6 +17,7 @@ body {
   color: var(--ink);
   background: var(--paper);
   line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 button,
 input,
@@ -141,7 +142,7 @@ nav a {
   color: var(--accent);
   background: var(--tint);
   font-size: 0.75rem;
-  white-space: nowrap;
+  max-width: 100%;
 }
 .page-intro {
   display: flex;
@@ -191,7 +192,7 @@ p {
 }
 .phase-label {
   font-size: 0.75rem;
-  white-space: nowrap;
+  max-width: 100%;
 }
 .section-heading {
   display: flex;
@@ -565,9 +566,15 @@ footer span {
   }
   nav {
     gap: 2rem;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+  .brand {
+    max-width: 100%;
+    flex-wrap: wrap;
   }
   .stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
     gap: 0.7rem;
   }
   .stats article {

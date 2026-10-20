@@ -29,7 +29,7 @@ export function App({ openDatabase }: { openDatabase?: OpenDatabase } = {}) {
 
   return (
     <>
-      <a className="skip-link" href="#main">
+      <a className="skip-link" href="#main" tabIndex={0}>
         Skip to content
       </a>
       <header className="site-header">
@@ -58,7 +58,7 @@ export function App({ openDatabase }: { openDatabase?: OpenDatabase } = {}) {
               learn.
             </p>
           </div>
-          <span className="phase-label">Phase 3 · Development build</span>
+          <span className="phase-label">Phase 4 · Release candidate</span>
         </div>
         {session.snapshot ? (
           <Workspace snapshot={session.snapshot} session={session} />

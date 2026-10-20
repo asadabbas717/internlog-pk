@@ -1,3 +1,4 @@
+import { useMemo, useRef, useState } from 'react';
 import type { WorkEntry } from '../../domain/model';
 import { durationLabel } from '../forms';
 
@@ -5,12 +6,25 @@ interface Props {
   entries: readonly WorkEntry[];
   disabled: boolean;
   onEdit: (entry: WorkEntry) => void;
-  onDelete: (entry: WorkEntry) => void;
+  onDelete: (entry: WorkEntry, trigger: HTMLButtonElement) => void;
 }
 export function EntryList({ entries, disabled, onEdit, onDelete }: Props) {
-  const ordered = [...entries].sort(
-    (a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id),
+  const ordered = useMemo(
+    () =>
+      [...entries].sort(
+        (a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id),
+      ),
+    [entries],
   );
+  const [requestedPage, setRequestedPage] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
+  const pageSize = 50;
+  const pageCount = Math.max(1, Math.ceil(ordered.length / pageSize));
+  const page = Math.min(requestedPage, pageCount - 1);
+  function changePage(next: number) {
+    setRequestedPage(next);
+    listRef.current?.focus();
+  }
   if (ordered.length === 0)
     return (
       <div className="empty-state">
@@ -24,8 +38,45 @@ export function EntryList({ entries, disabled, onEdit, onDelete }: Props) {
       </div>
     );
   return (
-    <div className="entry-list">
-      {ordered.map((entry) => (
+    <div
+      className="entry-list"
+      ref={listRef}
+      tabIndex={-1}
+      role="region"
+      aria-label="Saved work entries"
+    >
+      {ordered.length > pageSize && (
+        <div className="entry-pagination">
+          <p role="status">
+            Entries {page * pageSize + 1}–
+            {Math.min((page + 1) * pageSize, ordered.length)} of{' '}
+            {ordered.length}
+          </p>
+          <div className="form-actions">
+            <button
+              type="button"
+              className="secondary"
+              disabled={disabled || page === 0}
+              onClick={() => {
+                changePage(page - 1);
+              }}
+            >
+              Previous entries
+            </button>
+            <button
+              type="button"
+              className="secondary"
+              disabled={disabled || page === pageCount - 1}
+              onClick={() => {
+                changePage(page + 1);
+              }}
+            >
+              Next entries
+            </button>
+          </div>
+        </div>
+      )}
+      {ordered.slice(page * pageSize, (page + 1) * pageSize).map((entry) => (
         <article
           className="entry-card"
           key={entry.id}
@@ -64,8 +115,8 @@ export function EntryList({ entries, disabled, onEdit, onDelete }: Props) {
               type="button"
               className="text-button danger"
               disabled={disabled}
-              onClick={() => {
-                onDelete(entry);
+              onClick={(event) => {
+                onDelete(entry, event.currentTarget);
               }}
             >
               Delete entry

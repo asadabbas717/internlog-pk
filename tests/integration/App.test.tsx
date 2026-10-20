@@ -106,6 +106,60 @@ function confirmReplacement() {
 }
 
 describe('backup replacement through real storage coordination', () => {
+  it('keeps all saved records while paging and synchronously prepares saved-only native printing', async () => {
+    const data = makeData(
+      Array.from({ length: 55 }, (_, i) =>
+        makeEntry(i + 1, {
+          durationMinutes: 1,
+          description: `Synthetic task ${String(i + 1)}`,
+        }),
+      ),
+    );
+    const app = await boot(data);
+    expect(
+      within(
+        screen.getByRole('region', { name: 'Saved work entries' }),
+      ).getAllByRole('article'),
+    ).toHaveLength(50);
+    expect(document.getElementById('report')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Next entries' }));
+    expect(
+      within(
+        screen.getByRole('region', { name: 'Saved work entries' }),
+      ).getAllByRole('article'),
+    ).toHaveLength(5);
+    expect(screen.getByText('Synthetic task 1', { exact: true })).toBeTruthy();
+    const article = screen
+      .getByText('Synthetic task 1', { exact: true })
+      .closest('article');
+    if (!article) throw new Error('Missing saved work card');
+    fireEvent.click(
+      within(article).getByRole('button', { name: 'Edit entry' }),
+    );
+    expect(
+      screen
+        .getByRole('button', { name: 'Previous entries' })
+        .hasAttribute('disabled'),
+    ).toBe(true);
+    change('Work performed', 'Unsaved printing draft');
+    act(() => {
+      window.dispatchEvent(new Event('beforeprint'));
+    });
+    const report = screen.getByRole('region', { name: 'Internship logbook' });
+    expect(
+      within(report).getByText('Synthetic task 55', { exact: true }),
+    ).toBeTruthy();
+    expect(
+      within(report).getByText('Synthetic task 1', { exact: true }),
+    ).toBeTruthy();
+    expect(within(report).queryByText('Unsaved printing draft')).toBeNull();
+    act(() => {
+      window.dispatchEvent(new Event('afterprint'));
+    });
+    expect(document.getElementById('report')).toBeNull();
+    expect(fieldValue('Work performed')).toBe('Unsaved printing draft');
+    expect((await (await app.open()).load()).data).toEqual(data);
+  });
   it('rejects corrupt input without writes and cancels replacement without losing drafts', async () => {
     const app = await boot(makeData());
     fireEvent.click(screen.getByRole('button', { name: /Add entry/ }));

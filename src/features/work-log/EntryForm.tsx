@@ -14,6 +14,7 @@ import { EditorForm, fieldError, formIssue } from '../../components/EditorForm';
 import type { FormIssue } from '../../components/EditorForm';
 import { TextField } from '../../components/TextField';
 import { localToday, wholeNumber } from '../forms';
+import { createEntryId } from '../../infrastructure/entry-id';
 
 interface Props {
   initial: WorkEntry | null;
@@ -68,7 +69,7 @@ export function EntryForm({
     try {
       const link = draft.referenceUrl.trim();
       const entry = validateEntry({
-        id: initial?.id ?? crypto.randomUUID(),
+        id: initial?.id ?? createEntryId(),
         date: draft.date,
         description: draft.description.trim(),
         learningOutcomes: draft.learningOutcomes.trim(),

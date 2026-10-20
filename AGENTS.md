@@ -12,3 +12,6 @@
 - Test calculations, boundaries, upgrades, transaction failures, imports and offline behavior as they become applicable. No real student data. Review dependency licenses and security changes.
 - Update README and affected docs with behavior; record dated actual results, limitations, git state and exact next action in PROJECT_CONTEXT.md at every phase boundary. Never preserve stale passing claims after changes.
 - A phase is complete only when its acceptance criteria, applicable checks, critical review and documentation are complete. Report real evidence and stop. No destructive Git history, force push or automatic merge.
+
+- Keep ordinary work-log rendering bounded; summaries/backups/full print reports must still include every saved record. Preserve native beforeprint preparation and afterprint cleanup when changing report presentation.
+- Keep Pages publication manual and gated. Do not bypass the distribution asset allowlist or gzip budgets to hide regressions; review intentional changes and preserve runtime notices. No automatic Pages settings change or publication on push.

@@ -3,7 +3,22 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   base: './',
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'development-content-policy',
+      apply: 'serve',
+      transformIndexHtml(html) {
+        // Vite injects CSS into style elements for hot updates in development.
+        return html
+          .replace("style-src 'self';", "style-src 'self' 'unsafe-inline';")
+          .replace(
+            "connect-src 'self';",
+            "connect-src 'self' ws://127.0.0.1:*;",
+          );
+      },
+    },
+  ],
   test: {
     environment: 'jsdom',
     setupFiles: ['tests/setup.ts'],
