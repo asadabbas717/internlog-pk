@@ -56,3 +56,9 @@ See [Phase 4 acceptance plan](phase-4-plan.md) and [release guide](release.md). 
 Release checks extend the existing gates to Chromium desktop/mobile, Firefox and WebKit, narrower/landscape layouts, 200% text, reduced motion, modal cancellation focus, install assets, production policy/network behavior, bounded capacity and actual worker revisions/cache-scope isolation. Playwright engine/viewport/CPU emulation does not establish physical-device, installed Safari, screen-reader or printer behavior. Manual owner acceptance and live HTTPS hosting checks are explicit release limitations.
 
 Pages configuration uses manual dispatch on main with quality/audit/browser gates and least job permissions. Phase 4 prepares that configuration; actual publication/settings changes require a later owner instruction. No Phase 5 pilot or fabricated student feedback belongs to this phase.
+
+## Phase 5 pilot preparation
+
+See the [Phase 5 plan](phase-5-plan.md), [usability protocol](pilot-protocol.md) and [feedback record](pilot-feedback.md). The approved deliverable is preparation for a small pilot: voluntary participation, synthetic tasks with checkable results, minimal technical notes and explicit recovery/privacy safeguards. No real student records, unnecessary identifiers, analytics or data collection service are introduced.
+
+Existing owner reports and verified fixes are evidence only of those reports, not student-pilot participation. Record student sessions, recommendations and usability findings only when actually provided. Reproduce defects with synthetic data and verify corrections before marking them fixed. Keep unperformed sessions and device/HTTPS acceptance explicit; pilot preparation does not establish field validation or institutional endorsement. No new feature or application/schema change is required for this phase. An unavailable pilot need not indefinitely delay a separately accepted technical release.
