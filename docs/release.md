@@ -1,6 +1,6 @@
 # Release candidate and publication
 
-Phase 4 prepares a release candidate. This is not a claim of a completed physical-device, screen-reader, institutional or real-student pilot. See PROJECT_CONTEXT.md for dated checks and unresolved acceptance work. Keep records synthetic until the owner accepts the intended devices and recovery workflow.
+The release candidate is deployed at [InternLog PK](https://asadabbas717.github.io/internlog-pk/). The [acceptance record](acceptance.md) distinguishes verified deployment evidence and owner-reported Android checks from outstanding device/accessibility checks and unrun student sessions. This is not institutional approval or a completed real-student pilot. See PROJECT_CONTEXT.md for continuity. Keep records synthetic until the owner accepts the intended devices and recovery workflow.
 
 ## Local verification
 

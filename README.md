@@ -2,7 +2,9 @@
 
 A privacy-first, open-source internship logbook for computing students in Pakistan. It organizes genuine activities, configurable working-hour targets and printable weekly records. Independent of HEC and universities; it cannot certify attendance or guarantee academic credit.
 
-**Current status: Phase 4 release candidate; Phase 5 pilot preparation is complete, with actual student sessions not yet run.** Set up/edit a profile, configure your required hours and minutes, add/edit/delete authentic work entries, and view saved-record progress and Monday–Sunday weekly totals. Records persist in IndexedDB and work offline after successful production caching. Preview/print saved weekly logbooks and export/restore validated JSON backups. Use synthetic records until the owner accepts the intended devices and recovery workflow. There are no accounts, analytics, paid APIs or server-side student records.
+**Current status: deployed release candidate with owner-reported Android acceptance; Phase 5 pilot preparation is complete, with actual student sessions not yet run.** Set up/edit a profile, configure your required hours and minutes, add/edit/delete authentic work entries, and view saved-record progress and Monday–Sunday weekly totals. Records persist in IndexedDB and work offline after successful production caching. Preview/print saved weekly logbooks and export/restore validated JSON backups. Use synthetic records until the owner accepts the intended devices and recovery workflow. There are no accounts, analytics, paid APIs or server-side student records.
+
+Live site: [InternLog PK](https://asadabbas717.github.io/internlog-pk/). Chrome and its installed app share local records for the same origin/profile; this is not cloud synchronization.
 
 ## Getting started
 
@@ -39,7 +41,7 @@ Start with [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md), [requirements](docs/require
 
 Records belong to the browser profile and site address you use. Switching between development/preview ports, browsers or deployed sites opens separate storage. Conflicting saves keep the draft and require **Load latest records (keep draft)**, review, then an explicit save; do not blindly reapply old records. Corrupt storage is never reset automatically. Cancelled/failed deletions preserve records; confirmed deletion has no undo. Unsaved forms request confirmation before cancellation or page navigation, but cannot survive browser/device failure.
 
-Contribute through [CONTRIBUTING.md](CONTRIBUTING.md). See [SECURITY.md](SECURITY.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [Apache-2.0 license](LICENSE). The owner confirmed resolution of the reported desktop styling and phone entry-save problems; device versions and individual retest steps were not supplied. Full physical-device, screen-reader, institutional and real-student validation remain unverified.
+Contribute through [CONTRIBUTING.md](CONTRIBUTING.md). See [SECURITY.md](SECURITY.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [Apache-2.0 license](LICENSE). The owner reported successful Android saving/reloading, Chrome installation/offline operation, backup/recovery, PDF and TalkBack checks. Device/browser versions were not supplied; full iOS/Safari, broader-device and student field validation remain unverified. See the dated [deployment and acceptance record](docs/acceptance.md) for evidence and limits.
 
 The [small pilot protocol](docs/pilot-protocol.md) provides voluntary synthetic tasks, expected results and privacy safeguards. [Feedback](docs/pilot-feedback.md) distinguishes actual owner reports from future student sessions. No students have been recruited or tested by this preparation work. Technical release readiness and actual field validation are separate outcomes.
 

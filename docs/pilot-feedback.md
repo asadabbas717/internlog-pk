@@ -1,6 +1,6 @@
 # Feedback and field-validation record
 
-Updated 2026-10-21. **No student pilot sessions or student findings have been provided or conducted in this phase.** No participant count, usability score, testimonial or field-validation outcome is claimed. The [protocol](pilot-protocol.md) is prepared for later use; automated browser results are engineering evidence, not participant feedback.
+Updated 2026-10-22. **No student pilot sessions or student findings have been provided or conducted in this phase.** No participant count, usability score, testimonial or field-validation outcome is claimed. The [protocol](pilot-protocol.md) is prepared for later use; automated browser results are engineering evidence, not participant feedback.
 
 ## Actual owner feedback already received
 
@@ -11,7 +11,11 @@ These maintenance reports came from the owner in the project chat. They are not 
 | O-01 / 2026-10-21 | Owner saw unstyled HTML after npm run dev in Chrome and Firefox. HIGH: development UI presentation broken.              | dd6179c: development-only policy permits Vite's injected CSS; production remains strict. development.spec.ts checks computed styles and CSP in all four projects.                                 | Verified by automated checks; owner later reported everything fine.                                                                     |
 | O-02 / 2026-10-21 | Owner saw an access-local-records warning on entry save over LAN HTTP on iOS and Android. HIGH: new-entry save blocked. | dd6179c: UUID v4 IDs use getRandomValues instead of secure-context-only randomUUID. network-entry.spec.ts saves, reloads and edits on genuine non-secure HTTP; entry-id.test.ts checks UUID bits. | Verified by automated checks; owner later reported everything fine. Exact phone versions and individual retest steps were not supplied. |
 
-Both fixes are committed in [dd6179c](https://github.com/asadabbas717/internlog-pk/commit/dd6179ca6b47245fcfd62d735974230ea8e424af). Current independent audit passed 205 unit/integration tests, all 84 browser checks and the production build; dependency audit found zero vulnerabilities. Hosted Node 24 [quality run](https://github.com/asadabbas717/internlog-pk/actions/runs/39496561256) also passed. The owner's general acceptance is not evidence of a formal pilot, screen-reader use or live HTTPS installation.
+Both fixes are committed in [dd6179c](https://github.com/asadabbas717/internlog-pk/commit/dd6179ca6b47245fcfd62d735974230ea8e424af). Current independent audit passed 205 unit/integration tests, all 84 browser checks and the production build; dependency audit found zero vulnerabilities. Hosted Node 24 [quality run](https://github.com/asadabbas717/internlog-pk/actions/runs/39496561256) also passed. The earlier general acceptance was not evidence of a formal pilot or specific device checks. Subsequent guided Android acceptance and independently checked deployment evidence are recorded in [acceptance.md](acceptance.md).
+
+## Subsequent owner acceptance - 2026-10-22
+
+The owner supplied the live HTTPS URL and reported successful Samsung Internet/Chrome basic checks, Chrome/PWA installation and offline operation, backup/replacement, PDF output and the Android TalkBack walkthrough on one phone. Device/browser versions were not supplied. The Keep current records question was clarified as expected cancellation, with the inspection remaining; no new defect was established. These are owner maintenance/acceptance results, not student-pilot sessions. See [the acceptance matrix](acceptance.md) for exact scope and evidence.
 
 ## Minimal future session record
 
@@ -34,6 +38,6 @@ Participant reviewed retained notes: yes/no
 
 ## Unresolved findings and recommendations
 
-No unresolved student findings or feature recommendations have been supplied. Do not populate results from expectations in the protocol. Keep any future unverified report open until reproduced or explicitly explained; track deferred suggestions here with rationale rather than presenting them as implemented.
+No unresolved student findings have been supplied. The owner discussed merge-import as a possible future enhancement; it is deferred, unimplemented and not a replacement-restore defect. Any future design needs explicit duplicate/edit/deletion/conflict rules and separate authorization. Do not populate results from expectations in the protocol. Keep any future unverified report open until reproduced or explicitly explained; track deferred suggestions here with rationale rather than presenting them as implemented.
 
-Existing release checks remain open in the [release guide](release.md): live HTTPS/Pages publication and install/offline acceptance, intended-device screen-reader/native print behavior and low-end physical-device performance. They are unverified acceptance work, not invented pilot failures. Before scheduling sessions, the owner reviews the protocol preflight and chooses a safe synthetic test environment. Actual field validation remains NOT RUN.
+Outstanding checks are listed in [acceptance.md](acceptance.md), including full deployed iOS/Safari, broader-device/physical-performance coverage and physical printing. Android owner reports do not establish those results. They are acceptance work, not invented pilot failures. Before scheduling sessions, the owner reviews the protocol preflight and chooses a safe synthetic test environment. Actual field validation remains NOT RUN.
